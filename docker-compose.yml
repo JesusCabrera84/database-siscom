@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=pgadmin
+      - POSTGRES_PASSWORD=pgadmin123
+      - POSTGRES_DB=siscom-test
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - db-network
+    restart: unless-stopped
+
+  postgrest:
+    image: postgrest/postgrest:latest
+    container_name: postgrest
+    environment:
+      PGRST_DB_URI: postgres://siscom:siscom@postgres:5432/siscom-test
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_JWT_SECRET: "supersecretjwtkey"
+    depends_on:
+      - postgres
+    ports:
+      - "4000:3000"
+    networks:
+      - db-network
+    restart: unless-stopped
+
+networks:
+  db-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
