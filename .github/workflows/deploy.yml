@@ -6,6 +6,7 @@ on:
 
 jobs:
   deploy:
+    environment: test
     runs-on: ubuntu-latest
 
     steps:
@@ -19,8 +20,8 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         port: ${{ secrets.EC2_SSH_PORT }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "docker-compose.yml,init.sql"
-        target: "/opt/siscom-databases/"
+        source: "docker-compose.yml,init.sql,dump-test-ana.sql"
+        target: "/tmp/"
         overwrite: true
 
     - name: Deploy en EC2
@@ -33,7 +34,7 @@ jobs:
         timeout: 60s
         command_timeout: 10m
         script: |
-          cd /opt/siscom-databases
+          cd /tmp/
           
           # Instalar Docker y Docker Compose si no existen
           if ! command -v docker &> /dev/null; then
